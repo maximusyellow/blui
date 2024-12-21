@@ -1,16 +1,9 @@
 # blui
 
-A new Flutter project.
+Blui is a Bluetooth Manager GUI built on Flutter for the Linux based operating systems utilizing bluez
 
-## Getting Started
+This Bluetooth Manager is inspired by [bluetuith](https://github.com/darkhz/bluetuith) project, which is a great TUI-based bluetooth manager
 
-This project is a starting point for a Flutter application.
+## Installation
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+As this project is work in progress, the installation is currently not avaiable. The first release will hopefully be available on Flutter and AUR
