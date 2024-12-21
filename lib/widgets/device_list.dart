@@ -1,11 +1,15 @@
+import 'package:blui/utils/adapter_did_props_change.dart';
+import 'package:blui/utils/device_did_props_change.dart';
 import 'package:blui/utils/selected_adapter.dart';
 import 'package:flutter/material.dart';
 import 'package:bluez/bluez.dart';
 
 class DeviceListView extends StatefulWidget {
   SelectedAdapter selectedAdapter;
+  AdapterDidPropsChange adapterDidPropsChange;
+  DeviceDidPropsChange deviceDidPropsChange;
   // ignore: use_super_parameters
-  DeviceListView({Key? key, required this.selectedAdapter}) : super(key: key);
+  DeviceListView({Key? key, required this.selectedAdapter, required this.adapterDidPropsChange, required this.deviceDidPropsChange}) : super(key: key);
   @override
   State<DeviceListView> createState() => _DeviceListViewState();
 }
@@ -38,25 +42,38 @@ class _DeviceListViewState extends State<DeviceListView> {
     client.deviceAdded.listen((event) {
       setState(() {
         devices.removeWhere((d) => d.address == event.address);
-        devices.add(event);
+        if (event.name != "") {
+          devices.add(event);
+        }
       });
     });
     client.deviceRemoved.listen((event) {
       setState(() {
-        devices.remove(event);
+        devices.removeWhere((d) => d.address == event.address);
       });
     });
+  }
+
+  @override
+  void didUpdateWidget(covariant DeviceListView oldWidget) {
+    client = BlueZClient();
+    client.connect();
+    fetchBluetoothAdapters();
+    fetchDevices();
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
   void initState() {
     super.initState();
-    fetchBluetoothAdapters();
-    fetchDevices(); // Fetch Bluetooth adapters on initialization
   }
 
   @override
   void didChangeDependencies() {
+    client = BlueZClient();
+    client.connect();
+    fetchBluetoothAdapters();
+    fetchDevices();
     super.didChangeDependencies();
   }
 
@@ -65,10 +82,20 @@ class _DeviceListViewState extends State<DeviceListView> {
     return filteredDevices.map((device) {
       return ListTile(
         title: Text(device.alias),
-        subtitle: Text(device.adapter.alias),
+        subtitle: Text(device.icon),
         minVerticalPadding: 5,
+        leading: device.icon == 'audio-headset' ? Icon(Icons.headset_mic) : device.icon == 'audio-headphones' ? Icon(Icons.headphones) : device.icon == 'phone' ? Icon(Icons.smartphone) : device.icon == 'input-gaming' ? Icon(Icons.sports_esports) : Icon(Icons.bluetooth),
+        trailing: Wrap(
+          spacing: 8.0,
+          children: [
+            Icon(device.paired ? Icons.link : Icons.link_off),
+            Icon(device.trusted ? Icons.thumb_up : Icons.thumb_down),
+            Icon(device.connected ? Icons.bluetooth_connected : Icons.bluetooth_disabled),
+          ],
+        ),
         onTap: () {
           device.connect();
+          widget.deviceDidPropsChange.propsChanged();
         },
       );
     }).toList();
@@ -76,12 +103,11 @@ class _DeviceListViewState extends State<DeviceListView> {
 
   @override
   Widget build(BuildContext context) {
-    client.connect();
     double dynamicWidth = MediaQuery.of(context).size.width; 
     return ListView.builder(
       itemCount: deviceItems.length,
       itemBuilder: (BuildContext context, int index) {
-        var deviceTile = deviceItems.isNotEmpty ? deviceItems[index] : ListTile(title: Text('Please select an adapter'),);
+        var deviceTile = deviceItems.isNotEmpty ? deviceItems[index] : Text("");
         return deviceTile;
       },
     );

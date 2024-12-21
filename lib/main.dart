@@ -1,5 +1,6 @@
 import 'package:blui/theme/theme.dart';
 import 'package:blui/utils/adapter_did_props_change.dart';
+import 'package:blui/utils/device_did_props_change.dart';
 import 'package:blui/widgets/adapter_menu_anchor.dart';
 import 'package:blui/widgets/device_list.dart';
 import 'package:blui/widgets/scan_switch.dart';
@@ -18,6 +19,7 @@ class BluiApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final selectedAdapter = SelectedAdapter();
     final adapterDidPropsChange = AdapterDidPropsChange();
+    final deviceDidPropsChange = DeviceDidPropsChange();
     return MaterialApp(
       theme: lightMode,
       darkTheme: darkMode,
@@ -27,7 +29,8 @@ class BluiApp extends StatelessWidget {
           child: MultiProvider(
             providers: [
               ChangeNotifierProvider(create: (context) => selectedAdapter),
-              ChangeNotifierProvider(create: (context) => adapterDidPropsChange)
+              ChangeNotifierProvider(create: (context) => adapterDidPropsChange),
+              ChangeNotifierProvider(create: (context) => deviceDidPropsChange),
             ],
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -61,8 +64,14 @@ class BluiApp extends StatelessWidget {
                   ],
                 ),
                 Expanded(
-                  child: Consumer<SelectedAdapter>(
-                    builder: (context, selectedAdapter, child) => selectedAdapter.selectedAdapter != "" ? DeviceListView(selectedAdapter: selectedAdapter) : Padding( padding: EdgeInsets.only(left: 8), child: Text('Please select an adapter'))
+                  child: Consumer3<SelectedAdapter, AdapterDidPropsChange, DeviceDidPropsChange>(
+                    builder: (context, selectedAdapter, adapterDidPropsChange, deviceDidPropsChange, child) { 
+                      if (selectedAdapter.selectedAdapter != "") {
+                          return DeviceListView(selectedAdapter: selectedAdapter, adapterDidPropsChange: adapterDidPropsChange, deviceDidPropsChange: deviceDidPropsChange);
+                        } else {
+                          return Padding( padding: EdgeInsets.only(left: 8), child: Text(''));
+                        }
+                    }
                   )
                 )
               ],
