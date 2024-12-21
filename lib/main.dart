@@ -7,7 +7,6 @@ import 'package:blui/widgets/scan_switch.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:blui/utils/selected_adapter.dart';
-import 'package:bluez/bluez.dart';
 import 'widgets/adapter_dropdown.dart';
 
 void main() => runApp(const BluiApp());

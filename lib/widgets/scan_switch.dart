@@ -2,7 +2,6 @@ import 'package:bluez/bluez.dart';
 import 'package:blui/utils/adapter_did_props_change.dart';
 import 'package:blui/utils/selected_adapter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class ScanSwitch extends StatefulWidget {
 

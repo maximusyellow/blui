@@ -8,8 +8,7 @@ import 'package:flutter/services.dart';
 enum MenuItem { 
   powered('Powered: ', SingleActivator(LogicalKeyboardKey.keyO, control: true)),
   discoverable('Discoverable: ', SingleActivator(LogicalKeyboardKey.keyS, control: true)),
-  pairable('Pairable: ', SingleActivator(LogicalKeyboardKey.keyP, control: true)),
-  scan('Scan: ', SingleActivator(LogicalKeyboardKey.keyS, control: true));
+  pairable('Pairable: ', SingleActivator(LogicalKeyboardKey.keyP, control: true));
 
   const MenuItem(this.label, [this.shortcut]);
   final String label;
@@ -59,7 +58,6 @@ class _AdapterMenuAnchorState extends State<AdapterMenuAnchor> {
       widget.powered = adapter.powered ? 'On' : 'Off';
       widget.discoverable = adapter.discoverable ? 'On' : 'Off';
       widget.pairable = adapter.pairable ? 'On' : 'Off';
-      //widget.scan = adapter.discovering ? 'On' : 'Off';
     });
   }
 
@@ -92,7 +90,6 @@ class _AdapterMenuAnchorState extends State<AdapterMenuAnchor> {
       MenuItemButton(
           onPressed: () => {
             setState(() {
-              //widget.powered = widget.powered == 'On' ? 'Off' : 'On';
               adapter.powered ? adapter.setPowered(false) : adapter.setPowered(true);
               widget.didPropsChange.propsChanged();
             }),
@@ -104,7 +101,6 @@ class _AdapterMenuAnchorState extends State<AdapterMenuAnchor> {
         MenuItemButton(
           onPressed: () => {
             setState(() {
-              //widget.discoverable = widget.discoverable == 'On' ? 'Off' : 'On';
               adapter.discoverable ? adapter.setDiscoverable(false) : adapter.setDiscoverable(true);
               widget.didPropsChange.propsChanged();
             }),
@@ -116,7 +112,6 @@ class _AdapterMenuAnchorState extends State<AdapterMenuAnchor> {
         MenuItemButton(
           onPressed: () => {
             setState(() {
-              //widget.pairable = widget.pairable == 'On' ? 'Off' : 'On';
               adapter.pairable ? adapter.setPairable(false) : adapter.setPairable(true);
               widget.didPropsChange.propsChanged();
             }),
@@ -124,18 +119,6 @@ class _AdapterMenuAnchorState extends State<AdapterMenuAnchor> {
           shortcut: MenuItem.pairable.shortcut,
           child: Text(MenuItem.pairable.label + widget.pairable),
         ));
-    // menuItems.add(
-    //     MenuItemButton(
-    //       onPressed: () => {
-    //         setState(() {
-    //           //widget.scan = widget.scan == 'On' ? 'Off' : 'On';
-    //           adapter.discovering ? adapter.stopDiscovery() : adapter.startDiscovery();
-    //           widget.didPropsChange.propsChanged();
-    //         }),
-    //         },
-    //       shortcut: MenuItem.scan.shortcut,
-    //       child: Text(MenuItem.scan.label + widget.scan)
-    //     ));
     return menuItems;
   }
 

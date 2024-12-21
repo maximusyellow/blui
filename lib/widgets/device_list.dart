@@ -1,6 +1,8 @@
 import 'package:blui/utils/adapter_did_props_change.dart';
 import 'package:blui/utils/device_did_props_change.dart';
 import 'package:blui/utils/selected_adapter.dart';
+import 'package:blui/widgets/device_dialog.dart';
+import 'package:blui/widgets/device_menu_achor.dart';
 import 'package:flutter/material.dart';
 import 'package:bluez/bluez.dart';
 
@@ -91,11 +93,31 @@ class _DeviceListViewState extends State<DeviceListView> {
             Icon(device.paired ? Icons.link : Icons.link_off),
             Icon(device.trusted ? Icons.thumb_up : Icons.thumb_down),
             Icon(device.connected ? Icons.bluetooth_connected : Icons.bluetooth_disabled),
+            DeviceMenuAchor(deviceDidPropsChange: widget.deviceDidPropsChange, device: device),
           ],
         ),
-        onTap: () {
-          device.connect();
-          widget.deviceDidPropsChange.propsChanged();
+        onTap: () async {
+          try {
+            await device.connect();
+          } on BlueZFailedException {
+            showDialog(
+              // ignore: use_build_context_synchronously
+              context: context,
+              builder: (BuildContext context) => AlertDialog(
+                title: const Text('Bluetooth Error'),
+                content: Text('Connection to ${device.alias} timed out, please try again later'),
+                actions: <Widget>[
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, 'OK'),
+                    child: const Text('OK'),
+                  ),
+                ],
+              ),
+            );
+          }
+          setState(() {
+            widget.deviceDidPropsChange.propsChanged();
+          });
         },
       );
     }).toList();
