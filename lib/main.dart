@@ -1,7 +1,13 @@
-import 'package:collection/collection.dart';
+import 'package:blui/theme/theme.dart';
+import 'package:blui/utils/adapter_did_props_change.dart';
+import 'package:blui/widgets/adapter_menu_anchor.dart';
+import 'package:blui/widgets/device_list.dart';
+import 'package:blui/widgets/scan_switch.dart';
 import 'package:flutter/material.dart';
-import 'utils/bluetooth.dart';
+import 'package:provider/provider.dart';
+import 'package:blui/utils/selected_adapter.dart';
 import 'package:bluez/bluez.dart';
+import 'widgets/adapter_dropdown.dart';
 
 void main() => runApp(const BluiApp());
 
@@ -10,79 +16,60 @@ class BluiApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selectedAdapter = SelectedAdapter();
+    final adapterDidPropsChange = AdapterDidPropsChange();
     return MaterialApp(
-      theme: ThemeData(useMaterial3: true),
+      theme: lightMode,
+      darkTheme: darkMode,
       home: Scaffold(
         appBar: AppBar(title: const Text('Blui Bluetooth Manager')),
-        body: const SafeArea(
-          child: Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 8),
-                    child: AdapterDropdown(),
-                )
-              )
+        body: SafeArea(
+          child: MultiProvider(
+            providers: [
+              ChangeNotifierProvider(create: (context) => selectedAdapter),
+              ChangeNotifierProvider(create: (context) => adapterDidPropsChange)
             ],
-          ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: Consumer<SelectedAdapter>(
+                        builder: (context, selectedAdapter, child) => AdapterDropdown(selectedAdapter: selectedAdapter)
+                      ) 
+                    ),
+                    Consumer2<SelectedAdapter, AdapterDidPropsChange>(
+                      builder: (context, selectedAdapter, adapterDidPropsChange, child) {
+                        if (selectedAdapter.selectedAdapter != "") {
+                          return AdapterMenuAnchor(selectedAdapter: selectedAdapter, didPropsChange: adapterDidPropsChange); 
+                        } else {
+                          return Padding( padding: EdgeInsets.only(left: 8), child: Text('Please select an adapter'));
+                        }
+                      }    
+                    ),
+                    Consumer2<SelectedAdapter, AdapterDidPropsChange>(
+                      builder: (context, selectedAdapter, adapterDidPropsChange, child) {
+                        if (selectedAdapter.selectedAdapter != "") {
+                          return ScanSwitch(selectedAdapter: selectedAdapter, didPropsChange: adapterDidPropsChange); 
+                        } else {
+                          return Padding( padding: EdgeInsets.only(left: 8), child: Text(''));
+                        }
+                      }
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: Consumer<SelectedAdapter>(
+                    builder: (context, selectedAdapter, child) => selectedAdapter.selectedAdapter != "" ? DeviceListView(selectedAdapter: selectedAdapter) : Padding( padding: EdgeInsets.only(left: 8), child: Text('Please select an adapter'))
+                  )
+                )
+              ],
+            ),
+          )
         ),
       ),
-    );
-  }
-}
-
-class AdapterDropdown extends StatefulWidget {
-  const AdapterDropdown({super.key});
-
-  @override
-  State<AdapterDropdown> createState() => _AdapterDropdownState();
-}
-
-typedef MenuEntry = DropdownMenuEntry<String>;
-
-class _AdapterDropdownState extends State<AdapterDropdown> {
-  var bluetooth = Bluetooth();
-  List<BlueZAdapter> adapters = [];
-  String selectedAdapter = '';
-
-  Future<void> fetchBluetoothAdapters() async {
-    bluetooth.client.connect();
-    bluetooth.client.adapterAdded.listen((event) {
-      setState(() {
-        adapters.add(event);
-      });
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchBluetoothAdapters(); // Fetch Bluetooth adapters on initialization
-  }
-  List<DropdownMenuEntry<String>> get dropdownItems {
-    return adapters.map((adapter) {
-      return DropdownMenuEntry(
-        value: adapter.alias,
-        label: adapter.alias,
-      );
-    }).toList();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    double dynamicWidth = MediaQuery.of(context).size.width; 
-    return DropdownMenu<String>(
-      width: dynamicWidth * 0.5,
-      onSelected: (String? value) {
-        // This is called when the user selects an item.
-        setState(() {
-          selectedAdapter = value!;
-        });
-      },
-    
-      dropdownMenuEntries: dropdownItems,
     );
   }
 }
